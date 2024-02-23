@@ -5,7 +5,6 @@ using UnityEngine;
 public class Units : MonoBehaviour
 {
     private List<Unit> m_Units;
-    private List<GameObject> m_UnitObjects;
 
     [SerializeField]
     private List<GameObject> m_UnitPrefabs;
@@ -16,7 +15,6 @@ public class Units : MonoBehaviour
     private void Awake()
     {
         m_Units = new List<Unit>();
-        m_UnitObjects = new List<GameObject>();
     }
 
     public void RandomizeUnits()
@@ -25,9 +23,8 @@ public class Units : MonoBehaviour
         for (int i = 0; i < m_Slots.Count; i++)
         {
             GameObject unitPrefab = m_UnitPrefabs[Random.Range(0, m_UnitPrefabs.Count)];
-            var unit = Instantiate(unitPrefab, m_Slots[i].position, Quaternion.identity, m_Slots[i].transform);
+            var unit = Instantiate(unitPrefab, m_Slots[i].position, m_Slots[i].rotation, m_Slots[i].transform);
             m_Units.Add(unit.GetComponent<Unit>());
-            m_UnitObjects.Add(unit);
             unit.GetComponent<Unit>().RandomizeStats();
         }
     }
@@ -59,9 +56,8 @@ public class Units : MonoBehaviour
 
         foreach(int i in deadUnits)
         {
+            StartCoroutine(m_Units[i].Die());
             m_Units.RemoveAt(i);
-            Destroy(m_UnitObjects[i]);
-            m_UnitObjects.RemoveAt(i);
 
         }
 

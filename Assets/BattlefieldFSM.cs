@@ -21,7 +21,7 @@ public class BattlefieldFSM : MonoBehaviour
 
     void Start()
     {
-        StartCoroutine(GameLoop()); 
+        StartCoroutine(GameLoop());
     }
 
     private IEnumerator GameLoop()
@@ -32,6 +32,26 @@ public class BattlefieldFSM : MonoBehaviour
         }
         yield return null;
     }
+
+    private IEnumerator HandleAttackAnimations(Unit a, Unit b)
+    {
+        a.Aggro();
+        b.Aggro();
+
+        yield return new WaitForSeconds(.5f);
+
+        a.Attack();
+        b.Attack();
+        yield return new WaitForSeconds(.5f);
+
+        onUnitFight?.Invoke(a, b);
+        onUnitFight?.Invoke(b, a);
+        b.TakeDamage(a.m_Attack);
+        a.TakeDamage(b.m_Attack);
+
+        yield return null;
+    }
+   
 
     private IEnumerator HandleCurrentState()
     {
@@ -59,10 +79,7 @@ public class BattlefieldFSM : MonoBehaviour
 
                 if(m_GoodGuys.GetFirstUnit(out goodGuy) && m_BadGuys.GetFirstUnit(out badGuy))
                 {
-                    onUnitFight?.Invoke(badGuy, goodGuy);
-                    onUnitFight?.Invoke(goodGuy, badGuy);
-                    badGuy.m_Health -= goodGuy.m_Attack;
-                    goodGuy.m_Health -= badGuy.m_Attack;
+                    yield return HandleAttackAnimations(goodGuy, badGuy);
                 }
 
                 m_CurrentState = "CleanUp";
